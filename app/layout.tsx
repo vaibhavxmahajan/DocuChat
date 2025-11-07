@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Figtree, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const figTree = Figtree({
   variable : "--font-figtree",
@@ -31,6 +32,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${figTree.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
+        <Toaster richColors/>
       </body>
     </html>
   );

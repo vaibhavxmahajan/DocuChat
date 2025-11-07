@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1762512239495,
+      "tag": "0000_flimsy_microchip",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762513717228,
+      "tag": "0001_open_chamber",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762513992113,
+      "tag": "0002_majestic_magneto",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1762515891379,
+      "tag": "0003_flawless_blink",
+      "breakpoints": true
+    }
+  ]
+}

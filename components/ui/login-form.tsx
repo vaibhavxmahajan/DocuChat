@@ -1,38 +1,77 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+"use client";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import Link from "next/link"
-import RoutePaths from "@/constants/route-paths"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import RoutePaths from "@/constants/route-paths";
+import { Controller, useForm } from "react-hook-form";
+import z from "zod";
+import { loginSchema } from "@/validation-schemas/login-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { signInUser } from "@/app/server-actions/login-signup/login-signup-server-actions";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 export function LoginForm({
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"form">) {
+  const form = useForm<z.infer<typeof loginSchema>>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    resolver: zodResolver(loginSchema),
+  });
+  const router = useRouter();
+
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+    try {
+      const response = await signInUser(data);
+      if (!response.success) {
+        throw new Error(response?.error || response?.message);
+      }
+      toast.success(response?.message);
+      //redirect user to home page after login.
+      router.push(RoutePaths.HOME);
+      form.reset();
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>
-            Login with your Apple or Google account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+      onSubmit={form.handleSubmit(onSubmit)}
+    >
+      <FieldGroup>
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Welcome back</CardTitle>
+            <CardDescription>
+              Login with your Apple or Google account
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <FieldGroup>
               <Field>
                 <Button variant="outline" type="button">
@@ -57,41 +96,80 @@ export function LoginForm({
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
               </FieldSeparator>
+              <Controller
+                name="email"
+                control={form.control}
+                render={({ field, fieldState }) => {
+                  return (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                      <Input
+                        id={field.name}
+                        type="email"
+                        placeholder="m@example.com"
+                        aria-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError
+                          errors={[{ message: fieldState.error?.message }]}
+                        />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => {
+                  return (
+                    <Field data-invalid={fieldState.invalid}>
+                      <div className="flex items-center">
+                        <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                        <a
+                          href="#"
+                          className="ml-auto text-xs underline-offset-4 hover:underline"
+                        >
+                          Forgot your password?
+                        </a>
+                      </div>
+                      <Input
+                        id={field.name}
+                        type="password"
+                        placeholder="********"
+                        aria-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError
+                          errors={[{ message: fieldState.error?.message }]}
+                        />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-              </Field>
-              <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
-              </Field>
-              <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting && (
+                    <Loader2 className="size-4 animate-spin mr-2" />
+                  )}
+                  Login
+                </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <Link href={RoutePaths.SIGNUP}>Sign up</Link>
+                  Don&apos;t have an account?{" "}
+                  <Link href={RoutePaths.SIGNUP}>Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
-          </form>
-        </CardContent>
-      </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
-    </div>
-  )
+          </CardContent>
+        </Card>
+        <FieldDescription className="px-6 text-center">
+          By clicking continue, you agree to our{" "}
+          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </FieldDescription>
+      </FieldGroup>
+    </form>
+  );
 }

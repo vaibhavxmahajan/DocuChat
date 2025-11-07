@@ -9,6 +9,7 @@ export const userSignupSchema = z
     password: z
       .string()
       .min(8, { message: "Password must be at least 8 characters" })
+      .max(30, { message: "Password is too long" })
       .regex(
         /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/,
         "Password must contain at least one letter, one number, and one special character"

@@ -17,6 +17,10 @@ import { Controller, useForm } from "react-hook-form"
 import z from "zod"
 import { userSignupSchema } from "@/validation-schemas/user-signup-schema"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { signUpUser } from "@/app/server-actions/login-signup/login-signup-server-actions";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function SignupForm({
   className,
@@ -31,9 +35,22 @@ export function SignupForm({
     },
     resolver : zodResolver(userSignupSchema)
   })
+  const router = useRouter();
 
   const onSubmit = async(data : z.infer<typeof userSignupSchema>)=>{
-    console.log({ data })
+    try {
+      const response = await signUpUser(data)
+      // console.log({ response });
+      if(!response.success){
+        throw new Error(response?.error || response?.message);
+      }
+      toast.success(response?.message)
+      //redirect user to login page
+      router.push(RoutePaths.LOGIN);
+      form.reset();
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
   }
 
   return (
@@ -144,7 +161,12 @@ export function SignupForm({
           }}
         />
 
-        <Button type="submit">Create Account</Button>
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {
+            form.formState.isSubmitting && <Loader2 className="size-4 animate-spin mr-2"/>
+          }
+          Create Account
+        </Button>
 
         <FieldSeparator>Or continue with</FieldSeparator>
 
