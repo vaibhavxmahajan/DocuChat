@@ -5,7 +5,8 @@ import * as schema from "@/db/schema/index";
 import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins";
 import { resend } from "./helpers/resend";
-
+import VerifyEmail from "@/emails/verify-email";
+import { CONSTANTS } from "@/constants/constants";
 
 export const auth = betterAuth({
   database : drizzleAdapter(db, {
@@ -20,18 +21,18 @@ export const auth = betterAuth({
   plugins : [
     nextCookies(),
     emailOTP({
+      otpLength : 6,
+      expiresIn : 600, //Otp expied after 10 minutes
+      overrideDefaultEmailVerification : true,
       async sendVerificationOTP({ email, type, otp }) {
-          if(type === 'sign-in'){
-            //TODO sign in verfication email send
-            console.log({ email, otp, type })
+          if (type === "email-verification") {
             await resend.emails.send({
-              from: "Acme <onboarding@resend.dev>", // You could add your custom domain
-              to: email, // email of the user to want to end
-              subject: "Email Verification", // Main subject of the email
-              html: `Otp : ${otp}`, // Content of the email
-              // you could also use "React:" option for sending the email template and there content to user
+              from: CONSTANTS.FROM_EMAIL_WITH_NAME, // You could add your custom domain
+              to: [email],
+              subject: "Email Verification",
+              react: VerifyEmail({ verificationCode: otp }),
             });
-          }
+          } 
       },
     })
   ]

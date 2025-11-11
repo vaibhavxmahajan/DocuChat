@@ -1,7 +1,8 @@
 const RoutePaths = {
   HOME: "/",
   LOGIN: "/auth/login",
-  SIGNUP : '/auth/signup'
+  SIGNUP : '/auth/signup',
+  VERIFY_EMAIL : '/auth/verify-email'
 } as const;
 
 export const ProtectedRoutes = [

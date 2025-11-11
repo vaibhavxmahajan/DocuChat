@@ -54,8 +54,12 @@ export function SignupForm({
       // form.reset();
 
       //We don't need to create user account after hit submit , we need to send otp to email when user verify it then we create his/her account.
-      const isEmailSent = await sendVerificationEmail({ email : data.email })
-      console.log({ isEmailSent })
+      const sentEmail = await sendVerificationEmail({ email : data.email })
+      if(!sentEmail.success) throw new Error(sentEmail.message)
+
+      toast.success(sentEmail.message)
+      router.push(`${RoutePaths.VERIFY_EMAIL}?email=${data.email}`)
+      form.reset()
     } catch (error) {
       toast.error((error as Error).message);
     }
