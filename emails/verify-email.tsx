@@ -1,5 +1,6 @@
 import {
   Body,
+  Button,
   Container,
   Font,
   Head,
@@ -12,6 +13,8 @@ import {
   Text,
 } from "@react-email/components";
 import tailwindConfig from "../tailwind.config";
+import config from "@/config";
+import RoutePaths from "@/constants/route-paths";
 
 interface VerifyEmailProps {
   verificationCode: string;
@@ -63,6 +66,10 @@ export default function VerifyEmail({ verificationCode }: VerifyEmailProps) {
                   <Text className="text-[#333] text-[14px] m-0 text-center">
                     (This code is valid for 10 minutes)
                   </Text>
+
+                  <Button href={`${config.app_base_url}/${RoutePaths.VERIFY_EMAIL}`} className="bg-[#333] text-white p-4 rounded-lg mt-2.5 text-sm">
+                    Click here to verify your email address.
+                  </Button>
                 </Section>
               </Section>
             </Section>

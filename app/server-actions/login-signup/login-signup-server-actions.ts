@@ -24,7 +24,7 @@ export const signUpUser = async (
       data: response.user,
       error: null,
       status: ApiStatusCodes.CREATED,
-      message: "Account created successfully",
+      message: "Verification Code is sent to your email.",
     };
   } catch (error) {
     return {

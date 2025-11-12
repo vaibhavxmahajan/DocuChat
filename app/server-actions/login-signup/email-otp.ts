@@ -3,6 +3,7 @@
 import ApiStatusCodes from "@/constants/api-status-codes";
 import { auth } from "@/lib/auth";
 import { ApiResponseServer } from "@/types/api/api-response";
+import { User } from "@/types/user";
 
 export const sendVerificationEmail = async ({
   email,
@@ -34,17 +35,33 @@ export const sendVerificationEmail = async ({
   }
 };
 
-export const verifyEmailOtp = async({email, otp} : {email : string, otp : string}) =>{
-  console.log({email,otp})
+export const verifyEmailOtp = async ({
+  email,
+  otp,
+}: {
+  email: string;
+  otp: string;
+}): Promise<ApiResponseServer<Omit<User, "password">>> => {
   try {
+    if (!email || !otp) throw new Error("Required fields are missing");
     const data = await auth.api.verifyEmailOTP({
       body: {
         email: email, // required
         otp: otp, // required
       },
     });
-    console.log({data})
-  } catch (error) {
-    console.log(error)
+    return {
+      message: "Email Verified Successfully.",
+      success: data.status,
+      status: ApiStatusCodes.OK,
+      data: data.user,
+    };
+  } catch (error: any) {
+    return {
+      message: error?.message,
+      success: false,
+      status: error?.statusCode,
+      data: null,
+    };
   }
-}
+};

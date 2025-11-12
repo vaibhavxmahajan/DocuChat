@@ -21,7 +21,6 @@ import { signUpUser } from "@/app/server-actions/login-signup/login-signup-serve
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { sendVerificationEmail } from "@/app/server-actions/login-signup/email-otp";
 
 export function SignupForm({
   className,
@@ -40,26 +39,14 @@ export function SignupForm({
 
   const onSubmit = async(data : z.infer<typeof userSignupSchema>)=>{
     try {
-      // const response = await signUpUser(data)
-      // // console.log({ response });
-      // if(!response.success){
-      //   throw new Error(response?.error || response?.message);
-      // }
+      const response = await signUpUser(data);
+      if (!response.success) {
+        throw new Error(response?.error || response?.message);
+      }
 
-      // //If response is success we need to send the verification email to user to verify their email.
-
-      // toast.success(response?.message)
-      // //redirect user to login page
-      // router.push(RoutePaths.LOGIN);
-      // form.reset();
-
-      //We don't need to create user account after hit submit , we need to send otp to email when user verify it then we create his/her account.
-      const sentEmail = await sendVerificationEmail({ email : data.email })
-      if(!sentEmail.success) throw new Error(sentEmail.message)
-
-      toast.success(sentEmail.message)
-      router.push(`${RoutePaths.VERIFY_EMAIL}?email=${data.email}`)
-      form.reset()
+      toast.success(response.message);
+      router.push(`${RoutePaths.VERIFY_EMAIL}?email=${data.email}`);
+      form.reset();
     } catch (error) {
       toast.error((error as Error).message);
     }
@@ -175,7 +162,7 @@ export function SignupForm({
 
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {
-            form.formState.isSubmitting && <Loader2 className="size-4 animate-spin mr-2"/>
+            form.formState.isSubmitting && <Loader2 className="size-4 animate-spin"/>
           }
           Create Account
         </Button>

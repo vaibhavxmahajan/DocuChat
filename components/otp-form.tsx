@@ -1,6 +1,6 @@
 "use client";
 
-import { GalleryVerticalEnd } from "lucide-react"
+import { GalleryVerticalEnd, Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import verifyEmailSchema from "@/validation-schemas/verify-email-schema"
 import z from "zod"
 import { verifyEmailOtp } from "@/app/server-actions/login-signup/email-otp";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import RoutePaths from "@/constants/route-paths";
 
 type OtpFormProps = React.ComponentProps<"div"> & {
   email : string
@@ -34,13 +37,18 @@ export function OTPForm({ className,email, ...props }: OtpFormProps) {
     },
     resolver : zodResolver(verifyEmailSchema)
   })
+  const router = useRouter()
 
   const onSubmit = async(data : z.infer<typeof verifyEmailSchema>)=>{
-    console.log({data})
     try { 
-      await verifyEmailOtp({ email : email,otp : data.otp })
+      const response = await verifyEmailOtp({ email : email,otp : data.otp })
+      if(!response.success) throw new Error(response?.message)
+
+      form.reset()
+      toast.success(response.message)
+      router.push(RoutePaths.LOGIN)
     } catch (error) {
-      console.log(error)
+      toast.error((error as Error)?.message)
     }
   }
 
@@ -105,7 +113,12 @@ export function OTPForm({ className,email, ...props }: OtpFormProps) {
           />
           
           <Field>
-            <Button type="submit">Verify</Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              { 
+                form.formState.isSubmitting &&  <Loader2 className="size-4 animate-spin"/>
+              }
+              Verify
+            </Button>
           </Field>
         </FieldGroup>
       </form>

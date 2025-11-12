@@ -54,6 +54,8 @@ export function LoginForm({
       form.reset();
     } catch (error) {
       toast.error((error as Error).message);
+      //when error comes reset the password
+      form.resetField('password')
     }
   };
 
@@ -153,7 +155,7 @@ export function LoginForm({
               <Field>
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting && (
-                    <Loader2 className="size-4 animate-spin mr-2" />
+                    <Loader2 className="size-4 animate-spin" />
                   )}
                   Login
                 </Button>
